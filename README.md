@@ -187,7 +187,7 @@ Authorization: Bearer <token_jwt>
 
 ## � Licencia
 
-Este proyecto está licenciado bajo la GNU General Public License v3.0 (GPLv3). Puedes consultar el texto completo en [LICENSE](LICENSE).
+Este proyecto está licenciado bajo la GNU General Public License v3.0 (GPL-3.0). Puedes consultar el texto completo en [LICENSE](LICENSE).
 
 ## �🚧 Estado del proyecto
 
