@@ -1,0 +1,54 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Build output
+build/
+dist/
+out/
+coverage/
+**/dist/
+**/build/
+
+# Variables de entorno y datos sensibles
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+*.local
+*.pem
+*.key
+*.crt
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caché y temporales
+.cache/
+.tmp/
+.temp/
+*.tmp
+*.swp
+*.swo
+
+# Editor / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Archivos de test o cobertura
+coverage/
+
+# Otros artefactos locales
+*.sqlite
+*.sqlite3
+*.db
