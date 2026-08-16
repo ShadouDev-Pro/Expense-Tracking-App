@@ -185,7 +185,11 @@ La API está separada en rutas públicas y protegidas. Todas las rutas de gastos
 Authorization: Bearer <token_jwt>
 ```
 
-## 🚧 Estado del proyecto
+## � Licencia
+
+Este proyecto está licenciado bajo la GNU General Public License v3.0 (GPLv3). Puedes consultar el texto completo en [LICENSE](LICENSE).
+
+## �🚧 Estado del proyecto
 
 Este proyecto se encuentra actualmente en desarrollo activo. Se están añadiendo mejoras continuas, correcciones de experiencia de usuario y nuevas funcionalidades para convertirlo en una herramienta más completa y robusta.
 
