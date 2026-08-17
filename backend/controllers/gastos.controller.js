@@ -34,6 +34,7 @@ const crearGasto = (req, res) => {
 
   const nuevoGasto = {
     id: nextId++,
+    usuarioId: req.usuario.id,
     descripcion,
     monto,
     categoria,
@@ -51,7 +52,10 @@ const crearGasto = (req, res) => {
 // ?categoria=Comida&desde=2026-01-01&hasta=2026-01-31&buscar=cafe)
 const listarGastos = (req, res) => {
   const { categoria, desde, hasta, buscar } = req.query;
-  let resultado = [...gastos];
+
+  let resultado = gastos.filter(
+    (g) => g.usuarioId === req.usuario.id
+  );
 
   if (categoria) {
     resultado = resultado.filter(
@@ -81,30 +85,42 @@ const listarGastos = (req, res) => {
 
 // Resumen: total general y total por categoría
 const resumenGastos = (req, res) => {
-  const total = gastos.reduce((acc, g) => acc + g.monto, 0);
+  const gastosUsuario = gastos.filter(
+    (g) => g.usuarioId === req.usuario.id
+  );
 
-  const porCategoria = gastos.reduce((acc, g) => {
+  const total = gastosUsuario.reduce((acc, g) => acc + g.monto, 0);
+
+  const porCategoria = gastosUsuario.reduce((acc, g) => {
     acc[g.categoria] = (acc[g.categoria] || 0) + g.monto;
     return acc;
   }, {});
 
   res.json({
     total,
-    cantidadGastos: gastos.length,
+    cantidadGastos: gastosUsuario.length,
     porCategoria
   });
 };
 
 // Gastos marcados como recurrentes (suscripciones, alquiler, etc.)
 const gastosRecurrentes = (req, res) => {
-  const recurrentes = gastos.filter((g) => g.recurrente);
+  const recurrentes = gastos.filter(
+    (g) => g.usuarioId === req.usuario.id && g.recurrente
+  );
+
   res.json(recurrentes);
 };
 
-// Exporta todos los gastos como CSV descargable
+// Exporta los gastos del usuario autenticado como CSV descargable
 const exportarCSV = (req, res) => {
+  const gastosUsuario = gastos.filter(
+    (g) => g.usuarioId === req.usuario.id
+  );
+
   const encabezado = "id,descripcion,monto,categoria,fecha,recurrente";
-  const filas = gastos.map((g) =>
+
+  const filas = gastosUsuario.map((g) =>
     [
       g.id,
       `"${g.descripcion.replace(/"/g, '""')}"`,
@@ -122,6 +138,7 @@ const exportarCSV = (req, res) => {
     "Content-Disposition",
     `attachment; filename="gastos_${new Date().toISOString().slice(0, 10)}.csv"`
   );
+
   res.send(csv);
 };
 
@@ -135,7 +152,9 @@ const obtenerGasto = (req, res) => {
     });
   }
 
-  const gasto = gastos.find((g) => g.id === id);
+  const gasto = gastos.find(
+  (g) => g.id === id && g.usuarioId === req.usuario.id
+  );
 
   if (!gasto) {
     return res.status(404).json({
@@ -157,7 +176,9 @@ const actualizarGasto = (req, res) => {
     });
   }
 
-  const gasto = gastos.find((g) => g.id === id);
+  const gasto = gastos.find(
+  (g) => g.id === id && g.usuarioId === req.usuario.id
+  );
 
   if (!gasto) {
     return res.status(404).json({
@@ -185,7 +206,9 @@ const eliminarGasto = (req, res) => {
     });
   }
 
-  const index = gastos.findIndex((g) => g.id === id);
+  const index = gastos.findIndex(
+  (g) => g.id === id && g.usuarioId === req.usuario.id
+  );
 
   if (index === -1) {
     return res.status(404).json({

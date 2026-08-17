@@ -2,14 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 const gastosController = require("../controllers/gastos.controller");
+const verificarToken = require("../middleware/auth.middleware");
 
-router.post("/", gastosController.crearGasto);
-router.get("/", gastosController.listarGastos);
-router.get("/resumen", gastosController.resumenGastos); // antes de /:id
-router.get("/recurrentes", gastosController.gastosRecurrentes); // antes de /:id
-router.get("/exportar-csv", gastosController.exportarCSV); // antes de /:id
-router.get("/:id", gastosController.obtenerGasto);
-router.put("/:id", gastosController.actualizarGasto);
-router.delete("/:id", gastosController.eliminarGasto);
+router.post("/", verificarToken, gastosController.crearGasto);
+router.get("/", verificarToken, gastosController.listarGastos);
+router.get("/resumen", verificarToken, gastosController.resumenGastos);
+router.get("/recurrentes", verificarToken, gastosController.gastosRecurrentes);
+router.get("/exportar-csv", verificarToken, gastosController.exportarCSV);
+router.get("/:id", verificarToken, gastosController.obtenerGasto);
+router.put("/:id", verificarToken, gastosController.actualizarGasto);
+router.delete("/:id", verificarToken, gastosController.eliminarGasto);
 
 module.exports = router;

@@ -7,7 +7,11 @@ let presupuestos = leerPresupuestos(); // { "Comida": 200, "Transporte": 50 }
 
 // Obtener todos los presupuestos
 const obtenerPresupuestos = (req, res) => {
-  res.json(presupuestos);
+  const usuarioId = req.usuario.id;
+
+  const presupuestosUsuario = presupuestos[usuarioId] || {};
+
+  res.json(presupuestosUsuario);
 };
 
 // Crear o actualizar el límite de una categoría
@@ -26,23 +30,34 @@ const actualizarPresupuesto = (req, res) => {
     });
   }
 
-  presupuestos[categoria] = limite;
+  const usuarioId = req.usuario.id;
+
+  if (!presupuestos[usuarioId]) {
+    presupuestos[usuarioId] = {};
+  }
+
+  presupuestos[usuarioId][categoria] = limite;
+
   guardarPresupuestos(presupuestos);
 
-  res.json(presupuestos);
+  res.json(presupuestos[usuarioId]);
 };
 
 // Eliminar el presupuesto de una categoría
 const eliminarPresupuesto = (req, res) => {
   const { categoria } = req.params;
+  const usuarioId = req.usuario.id;
 
-  if (!(categoria in presupuestos)) {
+  if (
+    !presupuestos[usuarioId] ||
+    !(categoria in presupuestos[usuarioId])
+  ) {
     return res.status(404).json({
       error: "No hay presupuesto definido para esa categoría"
     });
   }
 
-  delete presupuestos[categoria];
+  delete presupuestos[usuarioId][categoria];
   guardarPresupuestos(presupuestos);
 
   res.json({ mensaje: "Presupuesto eliminado correctamente" });
