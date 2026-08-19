@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "id": 1,
+    "usuario": "Percebe",
+    "passwordHash": "$2a$10$RQ7nzM3t6EHR4IIkoVGYMuZUfm8EJlXqbm2OqdcKQUMCK4GuvzIOW"
+  }
+]
