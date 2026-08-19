@@ -1,4 +1,4 @@
-const AUTH_URL = `${import.meta.env.VITE_API_URL}/api/auth`;
+const AUTH_URL = `${import.meta.env.VITE_API_URL || ""}/api/auth`;
 
 const CLAVE_TOKEN = "gastos_token";
 const CLAVE_USUARIO = "gastos_usuario";
