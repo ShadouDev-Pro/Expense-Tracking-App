@@ -185,6 +185,10 @@ La API está separada en rutas públicas y protegidas. Todas las rutas de gastos
 Authorization: Bearer <token_jwt>
 ```
 
+## 🌐 Despliegue (Vercel)
+
+- **Enlace de Vercel (producción):** https://expense-tracking-app-azure.vercel.app/
+
 ## � Licencia
 
 Este proyecto está licenciado bajo la GNU General Public License v3.0 (GPL-3.0). Puedes consultar el texto completo en [LICENSE](LICENSE).
