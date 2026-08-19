@@ -1,7 +1,7 @@
 import { obtenerToken, cerrarSesion } from "./auth.js";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/gastos`;
-const PRESUPUESTOS_URL = `${import.meta.env.VITE_API_URL}/api/presupuestos`;
+const API_URL = `${import.meta.env.VITE_API_URL || ""}/api/gastos`;
+const PRESUPUESTOS_URL = `${import.meta.env.VITE_API_URL || ""}/api/presupuestos`;
 
 function cabeceras(conJson = true) {
   const cabecerasBase = {};
