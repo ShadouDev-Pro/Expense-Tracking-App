@@ -1,12 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { leerUsuarios, guardarUsuarios } = require("../data/usuariosDb");
+const { buscarUsuarioPorNombre, crearUsuario } = require("../data/usuariosDb");
 
 const JWT_SECRET = process.env.JWT_SECRET || "clave-de-desarrollo-no-usar-en-produccion";
 const EXPIRA_EN = "7d";
-
-let usuarios = leerUsuarios();
-let nextId = usuarios.length > 0 ? Math.max(...usuarios.map((u) => u.id)) + 1 : 1;
 
 function generarToken(usuario) {
   return jwt.sign({ id: usuario.id, usuario: usuario.usuario }, JWT_SECRET, {
@@ -28,24 +25,14 @@ const registrar = async (req, res) => {
     });
   }
 
-  const yaExiste = usuarios.find(
-    (u) => u.usuario.toLowerCase() === usuario.trim().toLowerCase()
-  );
+  const yaExiste = await buscarUsuarioPorNombre(usuario.trim());
 
   if (yaExiste) {
     return res.status(409).json({ error: "Ese usuario ya existe" });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-
-  const nuevoUsuario = {
-    id: nextId++,
-    usuario: usuario.trim(),
-    passwordHash
-  };
-
-  usuarios.push(nuevoUsuario);
-  guardarUsuarios(usuarios);
+  const nuevoUsuario = await crearUsuario(usuario.trim(), passwordHash);
 
   const token = generarToken(nuevoUsuario);
   res.status(201).json({ token, usuario: nuevoUsuario.usuario });
@@ -59,15 +46,13 @@ const login = async (req, res) => {
     return res.status(400).json({ error: "Usuario y contraseña son obligatorios" });
   }
 
-  const encontrado = usuarios.find(
-    (u) => u.usuario.toLowerCase() === usuario.trim().toLowerCase()
-  );
+  const encontrado = await buscarUsuarioPorNombre(usuario.trim());
 
   if (!encontrado) {
     return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
   }
 
-  const coincide = await bcrypt.compare(password, encontrado.passwordHash);
+  const coincide = await bcrypt.compare(password, encontrado.password_hash);
 
   if (!coincide) {
     return res.status(401).json({ error: "Usuario o contraseña incorrectos" });

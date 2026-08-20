@@ -1,11 +1,15 @@
-const { leerGastos, guardarGastos } = require("../data/db");
-
-// Estado en memoria, cargado desde el archivo JSON al arrancar el servidor
-let gastos = leerGastos();
-let nextId = gastos.length > 0 ? Math.max(...gastos.map((g) => g.id)) + 1 : 1;
+const {
+  crearGasto: crearGastoDb,
+  listarGastos: listarGastosDb,
+  obtenerGastoPorId,
+  actualizarGasto: actualizarGastoDb,
+  eliminarGasto: eliminarGastoDb,
+  resumenGastos: resumenGastosDb,
+  gastosRecurrentes: gastosRecurrentesDb
+} = require("../data/gastosDb");
 
 // Crear gasto
-const crearGasto = (req, res) => {
+const crearGasto = async (req, res) => {
   const { descripcion, monto, categoria, recurrente } = req.body;
 
   if (!descripcion || descripcion.trim() === "") {
@@ -32,91 +36,45 @@ const crearGasto = (req, res) => {
     });
   }
 
-  const nuevoGasto = {
-    id: nextId++,
-    usuarioId: req.usuario.id,
+  const nuevoGasto = await crearGastoDb(req.usuario.id, {
     descripcion,
     monto,
     categoria,
-    fecha: new Date(),
-    recurrente: Boolean(recurrente)
-  };
-
-  gastos.push(nuevoGasto);
-  guardarGastos(gastos);
+    recurrente
+  });
 
   res.status(201).json(nuevoGasto);
 };
 
-// Listar gastos (admite filtros opcionales por query string:
-// ?categoria=Comida&desde=2026-01-01&hasta=2026-01-31&buscar=cafe)
-const listarGastos = (req, res) => {
+// Listar gastos (admite filtros opcionales por query string)
+const listarGastos = async (req, res) => {
   const { categoria, desde, hasta, buscar } = req.query;
 
-  let resultado = gastos.filter(
-    (g) => g.usuarioId === req.usuario.id
-  );
-
-  if (categoria) {
-    resultado = resultado.filter(
-      (g) => g.categoria.toLowerCase() === categoria.toLowerCase()
-    );
-  }
-
-  if (desde) {
-    const fechaDesde = new Date(desde);
-    resultado = resultado.filter((g) => new Date(g.fecha) >= fechaDesde);
-  }
-
-  if (hasta) {
-    const fechaHasta = new Date(hasta);
-    resultado = resultado.filter((g) => new Date(g.fecha) <= fechaHasta);
-  }
-
-  if (buscar) {
-    const texto = buscar.toLowerCase();
-    resultado = resultado.filter((g) =>
-      g.descripcion.toLowerCase().includes(texto)
-    );
-  }
+  const resultado = await listarGastosDb(req.usuario.id, {
+    categoria,
+    desde,
+    hasta,
+    buscar
+  });
 
   res.json(resultado);
 };
 
 // Resumen: total general y total por categoría
-const resumenGastos = (req, res) => {
-  const gastosUsuario = gastos.filter(
-    (g) => g.usuarioId === req.usuario.id
-  );
-
-  const total = gastosUsuario.reduce((acc, g) => acc + g.monto, 0);
-
-  const porCategoria = gastosUsuario.reduce((acc, g) => {
-    acc[g.categoria] = (acc[g.categoria] || 0) + g.monto;
-    return acc;
-  }, {});
-
-  res.json({
-    total,
-    cantidadGastos: gastosUsuario.length,
-    porCategoria
-  });
+const resumenGastos = async (req, res) => {
+  const resumen = await resumenGastosDb(req.usuario.id);
+  res.json(resumen);
 };
 
-// Gastos marcados como recurrentes (suscripciones, alquiler, etc.)
-const gastosRecurrentes = (req, res) => {
-  const recurrentes = gastos.filter(
-    (g) => g.usuarioId === req.usuario.id && g.recurrente
-  );
-
+// Gastos marcados como recurrentes
+const gastosRecurrentes = async (req, res) => {
+  const recurrentes = await gastosRecurrentesDb(req.usuario.id);
   res.json(recurrentes);
 };
 
 // Exporta los gastos del usuario autenticado como CSV descargable
-const exportarCSV = (req, res) => {
-  const gastosUsuario = gastos.filter(
-    (g) => g.usuarioId === req.usuario.id
-  );
+const exportarCSV = async (req, res) => {
+  const gastosUsuario = await listarGastosDb(req.usuario.id, {});
 
   const encabezado = "id,descripcion,monto,categoria,fecha,recurrente";
 
@@ -143,7 +101,7 @@ const exportarCSV = (req, res) => {
 };
 
 // Obtener gasto
-const obtenerGasto = (req, res) => {
+const obtenerGasto = async (req, res) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -152,9 +110,7 @@ const obtenerGasto = (req, res) => {
     });
   }
 
-  const gasto = gastos.find(
-  (g) => g.id === id && g.usuarioId === req.usuario.id
-  );
+  const gasto = await obtenerGastoPorId(id, req.usuario.id);
 
   if (!gasto) {
     return res.status(404).json({
@@ -166,7 +122,7 @@ const obtenerGasto = (req, res) => {
 };
 
 // Actualizar gasto
-const actualizarGasto = (req, res) => {
+const actualizarGasto = async (req, res) => {
   const id = parseInt(req.params.id);
   const { descripcion, monto, categoria, recurrente } = req.body;
 
@@ -176,9 +132,12 @@ const actualizarGasto = (req, res) => {
     });
   }
 
-  const gasto = gastos.find(
-  (g) => g.id === id && g.usuarioId === req.usuario.id
-  );
+  const gasto = await actualizarGastoDb(id, req.usuario.id, {
+    descripcion,
+    monto,
+    categoria,
+    recurrente
+  });
 
   if (!gasto) {
     return res.status(404).json({
@@ -186,18 +145,11 @@ const actualizarGasto = (req, res) => {
     });
   }
 
-  if (descripcion !== undefined) gasto.descripcion = descripcion;
-  if (monto !== undefined) gasto.monto = monto;
-  if (categoria !== undefined) gasto.categoria = categoria;
-  if (recurrente !== undefined) gasto.recurrente = Boolean(recurrente);
-
-  guardarGastos(gastos);
-
   res.json(gasto);
 };
 
 // Eliminar gasto
-const eliminarGasto = (req, res) => {
+const eliminarGasto = async (req, res) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -206,18 +158,13 @@ const eliminarGasto = (req, res) => {
     });
   }
 
-  const index = gastos.findIndex(
-  (g) => g.id === id && g.usuarioId === req.usuario.id
-  );
+  const eliminado = await eliminarGastoDb(id, req.usuario.id);
 
-  if (index === -1) {
+  if (!eliminado) {
     return res.status(404).json({
       error: "Gasto no encontrado"
     });
   }
-
-  gastos.splice(index, 1);
-  guardarGastos(gastos);
 
   res.json({
     mensaje: "Gasto eliminado correctamente"
