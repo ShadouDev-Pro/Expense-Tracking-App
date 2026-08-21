@@ -56,8 +56,10 @@ const eliminarPresupuesto = async (req, res) => {
   res.json({ mensaje: "Presupuesto eliminado correctamente" });
 };
 
+const asyncHandler = require("../middleware/asyncHandler");
+
 module.exports = {
-  obtenerPresupuestos,
-  actualizarPresupuesto,
-  eliminarPresupuesto
+  obtenerPresupuestos: asyncHandler(obtenerPresupuestos),
+  actualizarPresupuesto: asyncHandler(actualizarPresupuesto),
+  eliminarPresupuesto: asyncHandler(eliminarPresupuesto)
 };

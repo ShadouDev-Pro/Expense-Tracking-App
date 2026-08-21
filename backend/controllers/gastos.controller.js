@@ -171,13 +171,15 @@ const eliminarGasto = async (req, res) => {
   });
 };
 
+const asyncHandler = require("../middleware/asyncHandler");
+
 module.exports = {
-  crearGasto,
-  listarGastos,
-  resumenGastos,
-  gastosRecurrentes,
-  exportarCSV,
-  obtenerGasto,
-  actualizarGasto,
-  eliminarGasto
+  crearGasto: asyncHandler(crearGasto),
+  listarGastos: asyncHandler(listarGastos),
+  resumenGastos: asyncHandler(resumenGastos),
+  gastosRecurrentes: asyncHandler(gastosRecurrentes),
+  exportarCSV: asyncHandler(exportarCSV),
+  obtenerGasto: asyncHandler(obtenerGasto),
+  actualizarGasto: asyncHandler(actualizarGasto),
+  eliminarGasto: asyncHandler(eliminarGasto)
 };

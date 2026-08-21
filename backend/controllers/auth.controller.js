@@ -62,4 +62,10 @@ const login = async (req, res) => {
   res.json({ token, usuario: encontrado.usuario });
 };
 
-module.exports = { registrar, login, JWT_SECRET };
+const asyncHandler = require("../middleware/asyncHandler");
+
+module.exports = {
+  registrar: asyncHandler(registrar),
+  login: asyncHandler(login),
+  JWT_SECRET
+};
