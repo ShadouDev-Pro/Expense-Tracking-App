@@ -23,6 +23,13 @@ app.get("/", (req, res) => {
   res.json({ mensaje: "API de control de gastos funcionando correctamente" });
 });
 
+// Manejador de errores global: cualquier error pasado con next(err)
+// termina aquí en vez de colgar la petición o mostrar HTML de Express
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "Ha ocurrido un error interno en el servidor" });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

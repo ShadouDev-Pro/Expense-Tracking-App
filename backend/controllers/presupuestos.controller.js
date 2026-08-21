@@ -1,21 +1,20 @@
 const {
-  leerPresupuestos,
-  guardarPresupuestos
+  obtenerPresupuestos: obtenerPresupuestosDb,
+  actualizarPresupuesto: actualizarPresupuestoDb,
+  eliminarPresupuesto: eliminarPresupuestoDb
 } = require("../data/presupuestosDb");
 
-let presupuestos = leerPresupuestos(); // { "Comida": 200, "Transporte": 50 }
-
 // Obtener todos los presupuestos
-const obtenerPresupuestos = (req, res) => {
+const obtenerPresupuestos = async (req, res) => {
   const usuarioId = req.usuario.id;
 
-  const presupuestosUsuario = presupuestos[usuarioId] || {};
+  const presupuestosUsuario = await obtenerPresupuestosDb(usuarioId);
 
   res.json(presupuestosUsuario);
 };
 
 // Crear o actualizar el límite de una categoría
-const actualizarPresupuesto = (req, res) => {
+const actualizarPresupuesto = async (req, res) => {
   const { categoria, limite } = req.body;
 
   if (!categoria || categoria.trim() === "") {
@@ -32,39 +31,35 @@ const actualizarPresupuesto = (req, res) => {
 
   const usuarioId = req.usuario.id;
 
-  if (!presupuestos[usuarioId]) {
-    presupuestos[usuarioId] = {};
-  }
+  const presupuestosActualizados = await actualizarPresupuestoDb(
+    usuarioId,
+    categoria,
+    limite
+  );
 
-  presupuestos[usuarioId][categoria] = limite;
-
-  guardarPresupuestos(presupuestos);
-
-  res.json(presupuestos[usuarioId]);
+  res.json(presupuestosActualizados);
 };
 
 // Eliminar el presupuesto de una categoría
-const eliminarPresupuesto = (req, res) => {
+const eliminarPresupuesto = async (req, res) => {
   const { categoria } = req.params;
   const usuarioId = req.usuario.id;
 
-  if (
-    !presupuestos[usuarioId] ||
-    !(categoria in presupuestos[usuarioId])
-  ) {
+  const eliminado = await eliminarPresupuestoDb(usuarioId, categoria);
+
+  if (!eliminado) {
     return res.status(404).json({
       error: "No hay presupuesto definido para esa categoría"
     });
   }
 
-  delete presupuestos[usuarioId][categoria];
-  guardarPresupuestos(presupuestos);
-
   res.json({ mensaje: "Presupuesto eliminado correctamente" });
 };
 
+const asyncHandler = require("../middleware/asyncHandler");
+
 module.exports = {
-  obtenerPresupuestos,
-  actualizarPresupuesto,
-  eliminarPresupuesto
+  obtenerPresupuestos: asyncHandler(obtenerPresupuestos),
+  actualizarPresupuesto: asyncHandler(actualizarPresupuesto),
+  eliminarPresupuesto: asyncHandler(eliminarPresupuesto)
 };

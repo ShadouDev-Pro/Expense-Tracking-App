@@ -1,23 +1,23 @@
-const fs = require("fs");
-const path = require("path");
+const pool = require("./db");
 
-const DB_PATH = path.join(__dirname, "usuarios.json");
+// Busca un usuario por su nombre. Devuelve la fila si existe, o null si no.
+async function buscarUsuarioPorNombre(usuario) {
+  const resultado = await pool.query(
+    "SELECT id, usuario, password_hash FROM usuarios WHERE LOWER(usuario) = LOWER($1)",
+    [usuario]
+  );
 
-// Lee los usuarios guardados: array de { id, usuario, passwordHash }
-function leerUsuarios() {
-  try {
-    const contenido = fs.readFileSync(DB_PATH, "utf-8");
-    return JSON.parse(contenido);
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      return [];
-    }
-    throw err;
-  }
+  return resultado.rows[0] || null;
 }
 
-function guardarUsuarios(usuarios) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(usuarios, null, 2), "utf-8");
+// Crea un usuario nuevo y devuelve la fila insertada (con su id ya generado)
+async function crearUsuario(usuario, passwordHash) {
+  const resultado = await pool.query(
+    "INSERT INTO usuarios (usuario, password_hash) VALUES ($1, $2) RETURNING id, usuario, password_hash",
+    [usuario, passwordHash]
+  );
+
+  return resultado.rows[0];
 }
 
-module.exports = { leerUsuarios, guardarUsuarios };
+module.exports = { buscarUsuarioPorNombre, crearUsuario };

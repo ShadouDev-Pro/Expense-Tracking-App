@@ -1,25 +1,16 @@
-const fs = require("fs");
+const { Pool } = require("pg");
 const path = require("path");
 
-const DB_PATH = path.join(__dirname, "gastos.json");
+require("dotenv").config({
+  path: path.join(__dirname, "../.env")
+});
 
-// Lee los gastos guardados en el archivo JSON.
-// Si el archivo no existe todavía, devuelve un array vacío.
-function leerGastos() {
-  try {
-    const contenido = fs.readFileSync(DB_PATH, "utf-8");
-    return JSON.parse(contenido);
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      return [];
-    }
-    throw err;
-  }
-}
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+});
 
-// Guarda el array de gastos completo en el archivo JSON.
-function guardarGastos(gastos) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(gastos, null, 2), "utf-8");
-}
-
-module.exports = { leerGastos, guardarGastos };
+module.exports = pool;

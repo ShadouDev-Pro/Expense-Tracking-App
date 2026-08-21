@@ -1,23 +1,51 @@
-const fs = require("fs");
-const path = require("path");
+const pool = require("./db");
 
-const DB_PATH = path.join(__dirname, "presupuestos.json");
+// Devuelve todos los presupuestos de un usuario como un objeto { categoria: limite }
+async function obtenerPresupuestos(usuarioId) {
+  const resultado = await pool.query(
+    "SELECT categoria, limite FROM presupuestos WHERE usuario_id = $1",
+    [usuarioId]
+  );
 
-// Lee los presupuestos guardados: un objeto { categoria: limiteMensual }
-function leerPresupuestos() {
-  try {
-    const contenido = fs.readFileSync(DB_PATH, "utf-8");
-    return JSON.parse(contenido);
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      return {};
-    }
-    throw err;
+  const presupuestos = {};
+  for (const fila of resultado.rows) {
+    presupuestos[fila.categoria] = Number(fila.limite);
   }
+
+  return presupuestos;
 }
 
-function guardarPresupuestos(presupuestos) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(presupuestos, null, 2), "utf-8");
+// Crea el límite de una categoría si no existe, o lo actualiza si ya existía.
+// Devuelve todos los presupuestos del usuario ya actualizados.
+async function actualizarPresupuesto(usuarioId, categoria, limite) {
+  const existente = await pool.query(
+    "SELECT id FROM presupuestos WHERE usuario_id = $1 AND categoria = $2",
+    [usuarioId, categoria]
+  );
+
+  if (existente.rows.length > 0) {
+    await pool.query(
+      "UPDATE presupuestos SET limite = $1 WHERE usuario_id = $2 AND categoria = $3",
+      [limite, usuarioId, categoria]
+    );
+  } else {
+    await pool.query(
+      "INSERT INTO presupuestos (usuario_id, categoria, limite) VALUES ($1, $2, $3)",
+      [usuarioId, categoria, limite]
+    );
+  }
+
+  return obtenerPresupuestos(usuarioId);
 }
 
-module.exports = { leerPresupuestos, guardarPresupuestos };
+// Elimina el presupuesto de una categoría. Devuelve true si existía, false si no
+async function eliminarPresupuesto(usuarioId, categoria) {
+  const resultado = await pool.query(
+    "DELETE FROM presupuestos WHERE usuario_id = $1 AND categoria = $2",
+    [usuarioId, categoria]
+  );
+
+  return resultado.rowCount > 0;
+}
+
+module.exports = { obtenerPresupuestos, actualizarPresupuesto, eliminarPresupuesto };
