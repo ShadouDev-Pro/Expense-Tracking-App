@@ -2,7 +2,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { buscarUsuarioPorNombre, crearUsuario } = require("../data/usuariosDb");
 
-const JWT_SECRET = process.env.JWT_SECRET || "clave-de-desarrollo-no-usar-en-produccion";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("Falta la variable de entorno JWT_SECRET");
+}
+
 const EXPIRA_EN = "7d";
 
 function generarToken(usuario) {
