@@ -203,6 +203,8 @@ La hoja de ruta del proyecto incluye las siguientes mejoras:
 - Sistema de notificaciones para presupuestos excedidos o gastos inusuales.
 - Exportación adicional a PDF y Excel.
 - Mejoras de UX/UI para una experiencia más moderna y accesible.
+- Implementación de despliegue profesional en producción.
+- Dashboard con indicadores clave de salud financiera personal.
 
 > ⚠️ **Demo educativa**
 >
@@ -212,5 +214,3 @@ La hoja de ruta del proyecto incluye las siguientes mejoras:
 >
 > No introduzcas datos personales, financieros o sensibles reales.
 > Utiliza únicamente datos ficticios para las pruebas.
-- Implementación de despliegue profesional en producción.
-- Dashboard con indicadores clave de salud financiera personal.
