@@ -12,6 +12,8 @@
   --borde-neon-fuerte: rgba(0, 231, 255, 0.6);
   --cian: #00e7ff;
   --magenta: #ff2ec4;
+  --ambar: #ffb84d;
+  --ambar-borde: rgba(255, 184, 77, 0.45);
   --lima: #baff5a;
   --texto: #e7f3ff;
   --texto-mudo: #7c8bb3;
@@ -707,4 +709,35 @@ body {
     text-align: center;
     padding: 9px 8px;
   }
+}
+
+.aviso-demo {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  text-align: center;
+  padding: 8px 16px;
+  background: rgba(10, 8, 2, 0.92);
+  border-bottom: 1px solid var(--ambar-borde);
+  box-shadow: 0 0 18px rgba(255, 184, 77, 0.15);
+  font-family: var(--fuente-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.4px;
+  color: var(--ambar);
+  text-shadow: 0 0 8px rgba(255, 184, 77, 0.35);
+}
+
+.aviso-demo-icono {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.aviso-demo strong {
+  font-family: var(--fuente-display);
+  letter-spacing: 1px;
 }
