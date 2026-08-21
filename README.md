@@ -201,6 +201,15 @@ La hoja de ruta del proyecto incluye las siguientes mejoras:
 - Mejoras en la gestión de gastos recurrentes con automatización y edición avanzada.
 - Añadir métricas más detalladas, gráficas comparativas y análisis mensual.
 - Sistema de notificaciones para presupuestos excedidos o gastos inusuales.
+
+> ⚠️ **Demo educativa**
+>
+> Esta aplicación ha sido desarrollada exclusivamente como proyecto
+> educativo y de portfolio. No está destinada a gestionar información
+> financiera real.
+>
+> No introduzcas datos personales, financieros o sensibles reales.
+> Utiliza únicamente datos ficticios para las pruebas.
 - Exportación adicional a PDF y Excel.
 - Mejoras de UX/UI para una experiencia más moderna y accesible.
 - Implementación de despliegue profesional en producción.
